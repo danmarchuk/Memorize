@@ -20,6 +20,31 @@ struct ContentView: View {
         .padding(.horizontal)
         .foregroundColor(.red)
     }
+    
+    var remove: some View {
+        Button {
+            if emojiCount > 1 {
+                emojiCount -= 1
+            }
+        } label: {
+            VStack{
+                Image(systemName: "minus.circle")
+            }
+        }
+    }
+    
+    var add: some View {
+        
+        Button {
+            if emojiCount < emojis.count {
+                emojiCount += 1
+            }
+        } label: {
+            VStack{
+                Image(systemName: "plus.circle")
+            }
+        }
+    }
 }
 
 struct CardView: View {
