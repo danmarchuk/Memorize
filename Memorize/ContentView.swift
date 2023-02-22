@@ -21,9 +21,10 @@ struct ContentView: View {
     }
 }
 
-
 struct CardView: View {
+    var content: String
     @State var isFaceUp: Bool = true
+    
     
     var body: some View {
         ZStack {
@@ -31,7 +32,7 @@ struct CardView: View {
             if isFaceUp {
                 shape.fill().foregroundColor(.white)
                 shape.stroke(lineWidth: 3)
-                Text("😈")
+                Text(content)
                     .font(.largeTitle)
             } else {
                 shape.fill()
