@@ -17,12 +17,15 @@ class EmojiMemoryGame {
     func makeCardContent(index: Int) -> String {
         return "🐵"
     }
-
-    private var model: MemoryGame<String> =
-    MemoryGame<String>(numberOfPairsOfCards: 12) { index in
-        emojis[index]
-        
+    
+    static func createMemoryGame() -> MemoryGame<String> {
+        MemoryGame<String>(numberOfPairsOfCards: 12) { index in
+            emojis[index]
+        }
     }
+    
+    private var model: MemoryGame<String> = createMemoryGame()
+    
     
     
     
