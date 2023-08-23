@@ -9,9 +9,9 @@ import SwiftUI
 
 // The ViewModes is an intermediary between the Model and the View
 // only the ViewModel's code itself can see the model
-class EmojiMemoryGame {
+class EmojiMemoryGame: ObservableObject {
     
-    static let emojis = ["😈", "🤡", "👻", "😸", "✊🏿", "👧", "🫦", "🧔‍♂️", "🦸", "👩‍🎤", "🧝‍♀️", "🩲", "👗", "👠", "👑", "🐰", "🐸", "🐰", "🐝", "🐭", "🐹", "🐌"]
+    static let emojis = ["✊🏿", "💆🏿‍♀️", "🙎🏿‍♀️", "💇🏿‍♀️", "🧖🏿‍♂️", "💅🏿", "🤦🏿‍♂️", "🙇🏿", "🤱🏿", "🙋🏿‍♀️", "🧝‍♀️", "🩲", "👗", "👠", "👑", "🐰", "🐸", "🐰", "🐝", "🐭", "🐹", "🐌"]
     
     
     func makeCardContent(index: Int) -> String {
@@ -24,13 +24,13 @@ class EmojiMemoryGame {
         }
     }
     
-    private var model: MemoryGame<String> = createMemoryGame()
-    
-    
-    
+    @Published private var model: MemoryGame<String> = createMemoryGame()
     
     var cards: Array<MemoryGame<String>.Card> {
         return model.cards
     }
-    
+    // MARK: - Intent(s)
+    func choose(_ card: MemoryGame<String>.Card) {
+        model.choose(card)
+    }
 }
