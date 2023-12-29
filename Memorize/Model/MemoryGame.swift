@@ -11,10 +11,15 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     // private(set) means that other classes can look at it but can't change it
     private(set) var cards: Array<Card>
     
-    private var indexOfTheONeAndOnlyFaceUpCard: Int?
+    private var indexOfTheONeAndOnlyFaceUpCard: Int? {
+        // filter through all the cards and give the first and only element of the array
+        get { cards.indices.filter ({ cards[$0].isFaceUp }).oneAndOnly }
+        set { cards.indices.forEach { cards[$0].isFaceUp = ($0 == newValue)}
+        }
+    }
     
     mutating func choose(_ card: Card) {
-        // find the index of the chosen card
+        // find the index of the chosen card in the array of cards
         if let chosenIndex = cards.firstIndex(where: { $0.id == card.id }),
            !cards[chosenIndex].isFaceUp, // card should not already be face up i.e. tap two times at one card
            !cards[chosenIndex].isMatched // card should not already be matched
@@ -27,37 +32,46 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                     cards[chosenIndex].isMatched = true
                     cards[potentialMatchIndex].isMatched = true
                 }
-                // reset the face-up card index
-                indexOfTheONeAndOnlyFaceUpCard = nil
+                cards[chosenIndex].isFaceUp = true
             } else {
-                for index in cards.indices {
-                    cards[index].isFaceUp = false
-                }
                 // mark the chosen card as the one and only face-up card
                 indexOfTheONeAndOnlyFaceUpCard = chosenIndex
             }
-            cards[chosenIndex].isFaceUp.toggle()
         }
+    }
+    
+    mutating func shuffle() {
+        cards.shuffle()
     }
     
     init(numberOfPairsOfCards: Int, createCardContent: (Int) -> CardContent) {
         // create an empty array of cards
-        cards = Array<Card>()
+        cards = []
         // add numberOfPairsOfCards x 2 cards to cards array
         for pairIndex in 0..<numberOfPairsOfCards {
             let content: CardContent = createCardContent(pairIndex)
             cards.append(Card(content: content, id: pairIndex*2))
             cards.append(Card(content: content, id: pairIndex*2+1))
         }
-        
+        cards.shuffle()
     }
     
     struct Card: Identifiable {
-        var isFaceUp: Bool = false
+        var isFaceUp: Bool = true
         var isMatched: Bool = false
         var content: CardContent
         var id: Int
         
     }
-    
+}
+
+extension Array {
+    var oneAndOnly: Element? {
+        if count == 1 {
+            return first
+        } else {
+            // reset the face-up card index
+            return nil
+        }
+    }
 }
