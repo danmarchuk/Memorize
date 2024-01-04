@@ -10,6 +10,8 @@ import Foundation
 struct MemoryGame<CardContent> where CardContent: Equatable {
     // private(set) means that other classes can look at it but can't change it
     private(set) var cards: Array<Card>
+    private(set) var score = 0
+    
     
     private var indexOfTheONeAndOnlyFaceUpCard: Int? {
         // filter through all the cards and give the first and only element of the array
@@ -31,12 +33,20 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                 if cards[chosenIndex].content == cards[potentialMatchIndex].content {
                     cards[chosenIndex].isMatched = true
                     cards[potentialMatchIndex].isMatched = true
+                    score += 2
+                } else {
+                    if cards[chosenIndex].hasBeenSeen {
+                        score -= 1
+                    }
+                    if cards[potentialMatchIndex].hasBeenSeen {
+                        score -= 1
+                    }
                 }
-                cards[chosenIndex].isFaceUp = true
             } else {
                 // mark the chosen card as the one and only face-up card
                 indexOfTheONeAndOnlyFaceUpCard = chosenIndex
             }
+            cards[chosenIndex].isFaceUp = true
         }
     }
     
@@ -57,11 +67,17 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     }
     
     struct Card: Identifiable {
-        var isFaceUp: Bool = true
+        var isFaceUp = false {
+            didSet {
+                if oldValue && !isFaceUp {
+                    hasBeenSeen = true
+                }
+            }
+        }
+        var hasBeenSeen = false
         var isMatched: Bool = false
         var content: CardContent
         var id: Int
-        
     }
 }
 

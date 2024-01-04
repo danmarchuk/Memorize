@@ -5,4 +5,23 @@
 //  Created by Данік on 31/12/2023.
 //
 
-import Foundation
+import SwiftUI
+
+struct CustomCellView: View {
+    var title: String
+    var subtitle: String
+    var themeColor: Color
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading) {
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(themeColor)
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+}
