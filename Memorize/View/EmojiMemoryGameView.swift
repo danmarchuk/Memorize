@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct EmojiMemoryGameView: View {
+    typealias Card = MemoryGame<String>.Card
     @ObservedObject var game: EmojiMemoryGame
     var title: String?
     var cardColor: Color?
@@ -76,17 +77,31 @@ struct EmojiMemoryGameView: View {
                 CardView(card: card)
                     .matchedGeometryEffect(id: card.id, in: dealingNamespace)
                     .padding(4)
+                    .overlay(FlyingNumber(number: scoreChange(causedBy: card)))
                 // .identity means don't do any animation
-                    .transition(AnyTransition.asymmetric(insertion: .identity, removal: .scale))
-                    .zIndex(zIndex(of: card))
+                    .transition(
+                        AnyTransition.asymmetric(
+                            insertion: .identity, removal: .scale))
+                //                    .zIndex(zIndex(of: card))
+                    .zIndex(scoreChange(causedBy: card) != 0 ? 1: 0)
                     .onTapGesture {
                         withAnimation(.easeInOut(duration: 0.8)){
+                            let scoreBeforeChoosing = game.score
                             game.choose(card)
+                            let scoreChange = game.score - scoreBeforeChoosing
+                            lastScoreChange = (scoreChange, causedByCardId: card.id)
                         }
                     }
             }
         }
         .foregroundColor(cardColor ?? Color.red)
+    }
+    
+    @State private var lastScoreChange = (0, causedByCardId: 0)
+    
+    private func scoreChange(causedBy card: Card) -> Int {
+        let (amount, causedByCardId: id) = lastScoreChange
+        return card.id == id ? amount : 0
     }
     
     var deckBody: some View {
@@ -122,10 +137,10 @@ struct EmojiMemoryGameView: View {
         Button("Restart") {
             for card in game.cards {
                 withAnimation(dealAnimation(for: card)){
-//                    dealt = []
+                    //                    dealt = []
                     undeal(card)
                     game.restart()
-
+                    
                 }
             }
         }
@@ -137,7 +152,6 @@ struct EmojiMemoryGameView: View {
     }
     
     private struct CardConstants {
-//        static let color = Color.green
         static let aspectRatio: CGFloat = 2/3
         static let dealDuration: Double = 0.8
         static let totalDealDuration: Double = 2
@@ -148,22 +162,37 @@ struct EmojiMemoryGameView: View {
 
 struct CardView: View {
     let card: EmojiMemoryGame.Card
-    @State private var isAnimating = false
+    
+    @State private var animatedBonusRemaining: Double = 0
     
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                Pie(startAngle: Angle(degrees: 0-90), endAngle: Angle(degrees: 120-90))
-                    .padding(5)
-                    .opacity(0.5)
+                Group {
+                    if card.isConsumingBonusTime {
+                        Pie(startAngle: Angle(degrees: 0-90), endAngle: Angle(degrees:  (1 - animatedBonusRemaining) * 360 - 90))
+                            .onAppear{
+                                animatedBonusRemaining = card.bonusRemaining
+                                withAnimation(.linear(duration: card.bonusTimeRemaining)) {
+                                    animatedBonusRemaining = 0
+                                }
+                            }
+                    } else {
+                        Pie(startAngle: Angle(degrees: 0-90), endAngle: Angle(degrees:  (1 - card.bonusPercentRemaining) * 360 - 90))
+                    }
+                }
+                .padding(5)
+                .opacity(0.5)
+                
                 Text(card.content)
                     .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
-                    .animation(.linear(duration: 1).repeatForever(autoreverses: false))
                     .font(Font.system(size: DrawingConstants.fontSize))
                     .scaleEffect(scale(thatFits: geometry.size))
+                
             }
             .cardify(isFaceUp: card.isFaceUp)
         }
+        
     }
     
     private func font(in size: CGSize) -> Font {
@@ -179,4 +208,9 @@ struct CardView: View {
         static let fontSize: CGFloat = 32
     }
 }
+
+#Preview {
+    EmojiMemoryGameView(game: EmojiMemoryGame(emojis: ["🍑", "🤓", "😈", "🤡", "👽", "🥵"]), title: "Amongus", cardColor: .black)
+}
+
 

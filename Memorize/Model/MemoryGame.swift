@@ -12,7 +12,6 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     private(set) var cards: Array<Card>
     private(set) var score = 0
     
-    
     private var indexOfTheONeAndOnlyFaceUpCard: Int? {
         // filter through all the cards and give the first and only element of the array
         get { cards.indices.filter ({ cards[$0].isFaceUp }).oneAndOnly }
@@ -33,7 +32,8 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                 if cards[chosenIndex].content == cards[potentialMatchIndex].content {
                     cards[chosenIndex].isMatched = true
                     cards[potentialMatchIndex].isMatched = true
-                    score += 2
+                    score += 2 + cards[chosenIndex].bonus +
+                    cards[potentialMatchIndex].bonus
                 } else {
                     if cards[chosenIndex].hasBeenSeen {
                         score -= 1
@@ -69,15 +69,92 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     struct Card: Identifiable {
         var isFaceUp = false {
             didSet {
+                if isFaceUp {
+                    startUsingBonusTime()
+                } else {
+                    stopUsingBonusTime()
+                }
+                
                 if oldValue && !isFaceUp {
                     hasBeenSeen = true
                 }
             }
         }
         var hasBeenSeen = false
-        var isMatched: Bool = false
+        var isMatched: Bool = false {
+            didSet {
+                if isMatched {
+                    stopUsingBonusTime()
+                }
+            }
+        }
         var content: CardContent
         var id: Int
+        
+        // MARK: - Bonus Time
+        
+        // the bonus erned so far (one point fo revery second the bonusTimeLimit that was not used)
+        // this gets smaller and smaller the longer card remains face up without being matched
+        var bonus: Int {
+            Int(bonusTimeLimit * bonusPercentRemaining)
+        }
+        
+        // percentage of the bonus time remaining
+        var bonusPercentRemaining: Double {
+            bonusTimeLimit > 0 ? max(0, bonusTimeLimit - faceUpTime) / bonusTimeLimit : 0
+        }
+        
+
+        
+        var faceUpTime: TimeInterval {
+            if let lastFaceUpDate {
+                return pastFaceUpTime + Date().timeIntervalSince(lastFaceUpDate)
+            } else {
+                return pastFaceUpTime
+            }
+        }
+        
+        // can be 0 which would mean "no bonus available" for matching this card quickly
+        var bonusTimeLimit: TimeInterval = 6
+        
+        // the last time this card was turned face up
+        var lastFaceUpDate: Date?
+        
+        // acumulated time card was face up in the past
+        // i.e. not including the current time if it is currently so
+        var pastFaceUpTime: TimeInterval = 0
+        
+
+        // how much time left before the bonus opportunity runs out
+        var bonusTimeRemaining: TimeInterval {
+            max(0, bonusTimeLimit - faceUpTime)
+        }
+        
+        var bonusRemaining: Double {
+            (bonusTimeLimit > 0 && bonusTimeRemaining > 0) ? bonusTimeRemaining/bonusTimeLimit : 0
+        }
+        
+        var hasEarnedBonus: Bool {
+            isMatched && bonusRemaining > 0
+        }
+        
+        // whether we are currently face up, unmatched and haven't yet used the bonus window
+        var isConsumingBonusTime: Bool {
+            isFaceUp && !isMatched && bonusTimeRemaining > 0
+        }
+        
+        // call this when card transitions is to face up state
+        private mutating func startUsingBonusTime() {
+            if isConsumingBonusTime, lastFaceUpDate == nil {
+                lastFaceUpDate = Date()
+            }
+        }
+        
+        // call this when card goes face down or gets matched
+        private mutating func stopUsingBonusTime() {
+            pastFaceUpTime = faceUpTime
+            lastFaceUpDate = nil
+        }
     }
 }
 

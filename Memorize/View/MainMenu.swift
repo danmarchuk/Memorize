@@ -64,7 +64,6 @@ struct MainMenu: View {
             .swipeActions(edge: .leading) {
                 Button("Edit") {
                     // Set the selected item index and present the sheet
-                    print(item.id)
                     selectedItem = item.id
                     isEditing = true
                 }
