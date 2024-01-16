@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CustomCellView: View {
+struct MenuCell: View {
     var title: String
     var subtitle: String
     var themeColor: Color

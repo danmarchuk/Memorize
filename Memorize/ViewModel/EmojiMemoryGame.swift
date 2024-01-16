@@ -44,10 +44,6 @@ class EmojiMemoryGame: ObservableObject {
     }
     
     func restart() {
-//        for index in model.cards.indices {
-//            model.cards[index].isMatched = false
-//            model.cards[index].isFaceUp = false
-//        }
         model = EmojiMemoryGame.createMemoryGame(emojis: emojis)
     }
 }

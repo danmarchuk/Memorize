@@ -58,7 +58,7 @@ struct MainMenu: View {
         List(items, id: \.self) { item in
             // if the user clicked on the chosen cell a new game opens
             NavigationLink(destination: EmojiMemoryGameView(game: EmojiMemoryGame (emojis: item.emojis.map{String($0)}), title: item.title, cardColor: item.color) ) {
-                CustomCellView(title: item.title, subtitle: item.emojis, themeColor: item.color)
+                MenuCell(title: item.title, subtitle: item.emojis, themeColor: item.color)
             }
             // User swiped right and the Edit screen is shown
             .swipeActions(edge: .leading) {

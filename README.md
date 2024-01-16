@@ -21,13 +21,20 @@
 
 The Emoji Memory Game is an iOS application implemented in SwiftUI. The app is a memory game where users match pairs of cards with emoji content. The game incorporates various features, including bonus time, scoring, shuffling, and restarting.
 
-## Code Structure
+## Code Structure (MVVM)
 
-The codebase is organized into two main files:
+The codebase is organized into:
 
-- **EmojiMemoryGameView.swift:** Defines the SwiftUI view for the game interface, including the card grid, score display, and interaction elements like shuffle and restart buttons.
+- **MemoryGame.swift:** Model that defines the underlying game logic, card structure, and bonus time calculations.
 
-- **MemoryGame.swift:** Defines the underlying game logic, card structure, and bonus time calculations.
+- **EmojiMemoryGame.swift:** ViemModel is an intermediary between the Model and the View. Only the ViewModel's code itself can see the model
+
+- **EmojiMemoryGameView.swift:** View that defines the SwiftUI view for the game interface, including the card grid, score display, and interaction elements like shuffle and restart buttons.
+
+- **MainMenu.swift:** View in which the user can choose the set of cards they want to play
+
+- **EditScreen.swift:** View in which the user can edit the selected set
+
 
 ## Features
 
